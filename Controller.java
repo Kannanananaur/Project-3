@@ -167,6 +167,10 @@ public class Controller {
 	 */
 	void colorChange() {
 		//TODO
+		selectedColor = Color.color(
+	                redSlider.getValue() / 255,
+	                greenSlider.getValue() / 255,
+	                blueSlider.getValue() / 255
 	}
 	
 	/**
@@ -255,25 +259,35 @@ public class Controller {
 	 * Assigned in the FXML
 	 */
 	@FXML
+	
+			// HIII I WAS TRYING TO MESS WITH THIS AND FELT STUPID SO WE BALL
+	
 	void globalKeyEvents(KeyEvent e) {
 //		//ESCAPE: Deselect shape or draw mode by returning to selectMode
-//		if () {
+		if (e.getCode == KeyCode.ESCAPE) {
 //			//TODO
-//		}
+			selectModeCheckBox.setSelected(true);
+			selectedNode = null;
+		}
 //		//Change text on a text
-//		else if (){
+		else if (mode.equals("text") && event.getText().length() > 0){
 //			//DELETE or BACK_SPACE: Remove last character of Text
 //			//Any other key: Add character to Text
 //			//TODO
-//		}
+			((Text) selectedNode).setText(((Text) selectedNode).getText() + event.getText())
+		}
 //		//DELETE or BACK_SPACE: Delete shape
-//		else if () {
+		else if (event.getCode() == KeyCode.BACK_SPACE || event.getCode() == KeyCode.DELETE) {
 //			//TODO
-//		}
+			drawingPane.getChildren().remove(selectedNode);
+           		 selectedNode = null;
+		}
 //		//SPACE: Reset and play animations
-//		else if () {
+		else if (event.getCode() == KeyCode.SPACE) {
 //			//TODO
-//		}
+			for (TranslateTransition t : shapeTransitions) {
+                		t.play();
+		}
 
 	}
 
@@ -292,23 +306,58 @@ public class Controller {
 			//Get mouse coordinates
 			//TODO
 
+			double x = e.getX();
+			double y = e.getY();
+	
 			//Set up the new Shape
 			Shape newShape = null;
 
 			//Make the correct kind of shape based on the mode
 			//TODO
+
+			if (mode.equals("circle")) {
+				Circle circle = new Circle(x, y, 20);
+				circle.setFill(selectedColor);
+				circle.setStroke(Color.BLACK);
+				newShape = circle;
+			} else if (mode.equals("rectangle")) {
+				Rectangle rect = new Rectangle(x, y, 40, 30);
+				rect.setFill(selectedColor);
+				rect.setStroke(Color.BLACK);
+				newShape = rect;
+			} else if (mode.equals("line")) {
+				Line line = new Line(x, y, x + 40, y + 40);
+				line.setStroke(selectedColor);
+				newShape = line;
+			} else if (mode.equals("text")) {
+				Text text = new Text(x, y, "Text");
+				text.setFill(selectedColor);
+				newShape = text;
+			}
 			
 			//Add Mouse Press to select the shape
 			newShape.addEventHandler(MouseEvent.MOUSE_PRESSED, e2 -> {
 				//Don't select the shape if we are drawing a new one
 				if (!drawing) {
 					//TODO
+
+					selectedNode = newShape;
+					x1 = e2.getSceneX();
+					y1 = e2.getSceneY();
 				}
 			});
 			
 			//Add Mouse Drag to move the shape
 			newShape.setOnMouseDragged(e2 -> {
 				//TODO
+
+				if (selectedNode != null && drawing) {
+					double x2 = e2.getSceneX() - x1;
+					double y2 = e2.getSceneY() - y1;
+					newShape.setLayoutX(newShape.getLayoutX() + x2);
+					newShape.setLayoutY(newShape.getLayoutY() + y2);
+					x1 = e2.getSceneX();
+					y1 = e2.getSceneY();
 			});		
 			drawing = true;
 		}
